@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript">
+        // Create a client instance
+        client = new Paho.MQTT.Client("127.0.0.1", Number(8888), "", "web_" + Math.floor(Math.random() * 26) + Date.now());
+        // set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        // connect the client
+        client.connect({
+            onSuccess: onConnect
+        });
+        // called when the client connects
+        function onConnect() {
+            // Once a connection has been made, make a subscription and send a message.
+            console.log("onConnect");
+            client.subscribe("salon/temperatura");
+            message = new Paho.MQTT.Message("Hello");
+            message.destinationName = "World";
+            client.send(message);
+        }
+        // called when the client loses its connection
+        function onConnectionLost(responseObject) {
+            if (responseObject.errorCode !== 0) {
+                console.log("onConnectionLost:" + responseObject.errorMessage);
+            }
+        }
+
+        // called when a message arrives
+        function onMessageArrived(message) {
+          console.log("onMessageArrived:" + message.payloadString);
+            var ejemplo = JSON.parse(message.payloadString);
+           // console.log("onMessageArrived:" + message.payloadString);
+            console.log("Temperatura:"+ejemplo.temperature);
+            console.log("Humdedad:"+ejemplo.humidity);
+             var temp = $("#temperatura");
+            temp.text(ejemplo.temperature);
+            var hum = $("#humedad").text(ejemplo.humidity);
+        }
+    </script>
+</head>
+<body>
+    <span>Temperatura: </span><span id="temperatura">Temperatura</span><br />
+    <span>Humedad: </span><span id="humedad">Temperatura</span> 
+</body>
+</html>
